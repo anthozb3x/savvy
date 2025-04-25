@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              BigInt   @id @default(autoincrement())
+  email           String   @unique
+  password        String
+  infos           Infos    @relation(fields: [idInfos], references: [id])
+  idInfos         BigInt
+  bankAccounts    BankAccount[]
+  budgets         Budget[]
+  recommendations Recommendation[]
+  challenges      Challenge[]
+  requisitions    Requisition[]
+  transactions    Transaction[] @relation("UserTransactions")
+}
+
+model Infos {
+  id                  BigInt  @id @default(autoincrement())
+  firstName           String?
+  lastName            String?
+  birthDate           DateTime?
+  jobStatus           String? // Étudiant, Salarié, etc.
+  monthlyIncome       Decimal? 
+  savingGoals         String? 
+  financialBehavior   String? // prudent, dépensier...
+  onboardingComplete  Boolean @default(false)
+  user                User[]
+}
+
+model BankAccount {
+  id                    BigInt   @id @default(autoincrement())
+  idUser                BigInt
+  user                  User     @relation(fields: [idUser], references: [id])
+  gocardlessAccountId   String   @unique
+  gocardlessRequisitionId String
+  institutionName       String?
+  iban                  String?
+  currency              String?
+  balance               Decimal?
+  status                String?  // actif, désactivé...
+  transactions          Transaction[]
+}
+
+model Transaction {
+  id              BigInt   @id @default(autoincrement())
+  idBankAccount   BigInt
+  bankAccount     BankAccount @relation(fields: [idBankAccount], references: [id])
+  idCategory      BigInt
+  category        Category @relation(fields: [idCategory], references: [id])
+  amount          Decimal
+  currency        String
+  bookingDate     DateTime
+  valueDate       DateTime
+  label           String
+  transactionId   String?
+  pending         Boolean  @default(false)
+  userId    BigInt
+  user      User   @relation("UserTransactions", fields: [userId], references: [id])
+}
+
+model Category {
+  id              BigInt   @id @default(autoincrement())
+  name            String
+  subcategories   Subcategory[]
+  transactions    Transaction[]
+  budgets         Budget[]
+}
+
+model Subcategory {
+  id              BigInt   @id @default(autoincrement())
+  idCategory      BigInt
+  category        Category @relation(fields: [idCategory], references: [id])
+  name            String
+}
+
+model Budget {
+  id              BigInt   @id @default(autoincrement())
+  idUser          BigInt
+  user            User     @relation(fields: [idUser], references: [id])
+  idCategory      BigInt
+  category        Category @relation(fields: [idCategory], references: [id])
+  amount          Decimal
+  period          String   // ex: 'monthly'
+}
+
+model Recommendation {
+  id              BigInt   @id @default(autoincrement())
+  idUser          BigInt
+  user            User     @relation(fields: [idUser], references: [id])
+  content         String
+  createdAt       DateTime @default(now())
+}
+
+model Challenge {
+  id              BigInt   @id @default(autoincrement())
+  idUser          BigInt
+  user            User     @relation(fields: [idUser], references: [id])
+  title           String
+  description     String?
+  completed       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+}
+
+model Requisition {
+  id              BigInt   @id @default(autoincrement())
+  idUser          BigInt
+  user            User     @relation(fields: [idUser], references: [id])
+  requisitionId   String   @unique
+  institutionId   String
+  agreementId     String?
+  reference       String?
+  link            String
+  status          String   // CR, LN, EX...
+  createdAt       DateTime @default(now())
+  expiresAt       DateTime?
+}
