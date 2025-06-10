@@ -5,7 +5,7 @@ import '../../core/themes/app_colors.dart';
 import '../../core/themes/app_text_styles.dart';
 import '../view_model/onboarding_view_model.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends StatefulWidget {
   OnboardingScreen({super.key});
 
   final List<_OnboardingPageData> pages = const [
@@ -29,10 +29,29 @@ class OnboardingScreen extends StatelessWidget {
   ];
 
   @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  double _progress = 0.0;
+  bool _isAnimating = false;
+
+  void _onCommencerTap() {
+    setState(() {
+      _isAnimating = true;
+      _progress = 1.0;
+    });
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (mounted) context.go('/login');
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
     final pageController = PageController();
+    final pages = widget.pages;
 
     return ChangeNotifierProvider(
       create: (_) => OnboardingViewModel(),
@@ -114,59 +133,121 @@ class OnboardingScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: height * 0.04),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: width * 0.15),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: height * 0.08,
-                      child: GestureDetector(
-                        onTap: () {
-                          if (viewModel.currentPage < pages.length - 1) {
+                  if (viewModel.currentPage == pages.length - 1)
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: width * 0.15),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: height * 0.08,
+                        child: GestureDetector(
+                          onTap: _isAnimating ? null : _onCommencerTap,
+                          child: Stack(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      AppColors.gradientStart,
+                                      AppColors.gradientMiddle,
+                                      AppColors.gradientEnd,
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.circular(height * 0.044),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.15),
+                                      blurRadius: 8.7,
+                                      offset: Offset(0, 3.5),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 700),
+                                curve: Curves.easeInOut,
+                                width: _progress *
+                                    MediaQuery.of(context).size.width,
+                                height: height * 0.08,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      AppColors.gradientInscriptionStart,
+                                      AppColors.gradientInscriptionEnd,
+                                    ],
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.circular(height * 0.044),
+                                ),
+                              ),
+                              Center(
+                                child: Text(
+                                  'Commencer',
+                                  style: TextStyle(
+                                    color: AppColors.blanc,
+                                    fontSize: width * 0.05,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: width * 0.15),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: height * 0.08,
+                        child: GestureDetector(
+                          onTap: () {
                             pageController.animateToPage(
                               viewModel.currentPage + 1,
                               duration: const Duration(milliseconds: 300),
                               curve: Curves.ease,
                             );
-                          } else {
-                            context.go('/login');
-                          }
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppColors.gradientStart,
-                                AppColors.gradientMiddle,
-                                AppColors.gradientEnd,
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(height * 0.044),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.15),
-                                blurRadius: 8.7,
-                                offset: Offset(0, 3.5),
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.gradientStart,
+                                  AppColors.gradientMiddle,
+                                  AppColors.gradientEnd,
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-                            ],
-                          ),
-                          child: Center(
-                            child: Text(
-                              viewModel.currentPage < pages.length - 1
-                                  ? 'Suivant'
-                                  : 'Commencer',
-                              style: AppTextStyles.onboardingTitle.copyWith(
-                                fontSize: width * 0.05,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.blanc,
+                              borderRadius:
+                                  BorderRadius.circular(height * 0.044),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 8.7,
+                                  offset: Offset(0, 3.5),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Suivant',
+                                style: TextStyle(
+                                  color: AppColors.blanc,
+                                  fontSize: width * 0.05,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
                   SizedBox(height: height * 0.05),
                 ],
               ),
