@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'providers/counter_provider.dart';
-import 'router/app_router.dart';
+import 'routing/app_router.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -10,11 +9,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => CounterProvider()),
+        Provider.value(value: 1), // Provider factice, à remplacer plus tard
       ],
       child: MaterialApp.router(
         title: 'Savvy App',
-        routerConfig: router,
+        routerConfig: appRouter,
       ),
     );
   }
