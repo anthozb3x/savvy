@@ -10,4 +10,8 @@ class AppColors {
   static const Color gradientMiddle =
       Color(0xFFAF7FEA); // Milieu gradient bouton
   static const Color gradientEnd = Color(0xFF6472ED); // Fin gradient bouton
+  static const Color gradientInscriptionStart =
+      Color(0xFFB18AE1); // Début gradient inscription
+  static const Color gradientInscriptionEnd =
+      Color(0xFF6472ED); // Fin gradient inscription
 }
